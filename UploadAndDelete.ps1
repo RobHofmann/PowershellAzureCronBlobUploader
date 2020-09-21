@@ -19,15 +19,15 @@ param (
     [bool] $deleteOnSuccessfulUpload
 )
 
-function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $containerName, $gracePeriodInSeconds)
+function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $containerName, $filesOlderThan, $deleteOnSuccessfulUpload)
 {
     $subDirectories = Get-ChildItem -Path $directory -Directory
     foreach ($subDirectory in $subDirectories) {
         #Write-Host $subDirectory
-        UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $subDirectory -storageContext $storageContext -containerName $containerName
+        UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $subDirectory -storageContext $storageContext -containerName $containerName -filesOlderThan $filesOlderThan -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
     }
 
-    $files = Get-ChildItem -Path $directory -File | Where-Object {$_.Lastwritetime -lt (Get-date).AddSeconds($gracePeriodInSeconds * -1)}
+    $files = Get-ChildItem -Path $directory -File | Where-Object {$_.Lastwritetime -lt $filesOlderThan}
     foreach ($file in $files) {
         $relativePath = $file.Directory | Resolve-Path -Relative
         $blobFilename = Join-Path $relativePath $file.Name
@@ -57,7 +57,7 @@ function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $con
     }
 }
 
-
+$cutOffDate = (Get-date).AddSeconds($gracePeriodInSeconds * -1)
 $storageContext = New-AzStorageContext -storageAccountName $storageAccountName -storageAccountKey $storageAccountKey
 Set-Location $uploadRootDirectory
-UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -storageContext $storageContext -containerName $containerName -gracePeriodInSeconds $gracePeriodInSeconds
+UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -storageContext $storageContext -containerName $containerName -filesOlderThan $cutOffDate -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
