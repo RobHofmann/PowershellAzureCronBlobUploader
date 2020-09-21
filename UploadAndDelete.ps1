@@ -30,9 +30,7 @@ function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $con
     $files = Get-ChildItem -Path $directory -File | Where-Object {$_.Lastwritetime -lt (Get-date).AddSeconds($gracePeriodInSeconds * -1)}
     foreach ($file in $files) {
         $relativePath = $file.Directory | Resolve-Path -Relative
-        $relativePath = $relativePath -split "\\"
-        $first, $relativePath = $relativePath
-        $blobFilename = ($relativePath | Join-String -Separator "\") + "\$($file.Name)"
+        $blobFilename = Join-Path $relativePath $file.Name
         Write-Host "Uploading $file"
         $uploadResult = Set-AzStorageBlobContent -File $file -Container $containerName -Blob $blobFilename -Context $storageContext -Force
 
