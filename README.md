@@ -16,6 +16,6 @@ Powershell script that uploads files to Blob storage &amp; optionally deletes up
 2. The data to be uploaded should be mounted at /data inside the container.
 
 ## Example
-```yaml
+```
 docker run --name=myuploader -e UPLOAD_CRON_EXPRESSION='*/2 * * * *' -e STORAGE_ACCOUNT_NAME="mystorageaccount" -e STORAGE_ACCOUNT_KEY="mOIUoumoimUOImuoyb9696d93q8m9+asd+1f==" -e BLOB_CONTAINER_NAME="mydata" -e DELETE_ON_SUCCESSFUL_UPLOAD=1 -v /some/data/path/on/host:/data -d robhofmann/powershellazurecronblobuploader
 ```
