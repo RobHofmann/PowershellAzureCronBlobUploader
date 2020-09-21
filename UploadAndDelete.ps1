@@ -1,25 +1,25 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
+    [Parameter(Mandatory=$true)]
     [String] $uploadRootDirectory,
 
-    [Parameter()]
+    [Parameter(Mandatory=$true)]
     [string] $storageAccountName,
 
-    [Parameter()]
+    [Parameter(Mandatory=$true)]
     [string] $storageAccountKey,
 
-    [Parameter()]
+    [Parameter(Mandatory=$true)]
     [string] $containerName,
 
-    [Parameter()]
-    [int] $gracePeriodInSeconds,
+    [Parameter(Mandatory=$false)]
+    [int] $gracePeriodInSeconds = 0,
 
-    [Parameter()]
+    [Parameter(Mandatory=$true)]
     [bool] $deleteOnSuccessfulUpload
 )
 
-function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $containerName)
+function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $containerName, $gracePeriodInSeconds)
 {
     $subDirectories = Get-ChildItem -Path $directory -Directory
     foreach ($subDirectory in $subDirectories) {
@@ -60,4 +60,4 @@ function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $con
 
 $storageContext = New-AzStorageContext -storageAccountName $storageAccountName -storageAccountKey $storageAccountKey
 Set-Location $uploadRootDirectory
-UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -storageContext $storageContext -containerName $containerName
+UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -storageContext $storageContext -containerName $containerName -gracePeriodInSeconds $gracePeriodInSeconds
