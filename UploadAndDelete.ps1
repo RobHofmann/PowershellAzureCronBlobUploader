@@ -16,7 +16,7 @@ param (
     [int] $gracePeriodInSeconds = 0,
 
     [Parameter(Mandatory=$true)]
-    [bool] $deleteOnSuccessfulUpload
+    [int] $deleteOnSuccessfulUpload
 )
 
 function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $containerName, $filesOlderThan, $deleteOnSuccessfulUpload)
