@@ -21,12 +21,13 @@ param (
 
 function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $containerName, $filesOlderThan, $deleteOnSuccessfulUpload)
 {
+    # First recurse through subdirectories
     $subDirectories = Get-ChildItem -Path $directory -Directory
     foreach ($subDirectory in $subDirectories) {
-        #Write-Host $subDirectory
         UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $subDirectory -storageContext $storageContext -containerName $containerName -filesOlderThan $filesOlderThan -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
     }
 
+    # Get all files and see if we need to upload them.
     $files = Get-ChildItem -Path $directory -File | Where-Object {$_.Lastwritetime -lt $filesOlderThan}
     foreach ($file in $files) {
         $relativePath = $file.Directory | Resolve-Path -Relative
@@ -54,6 +55,13 @@ function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $con
         {
             Write-Error "Something went wrong uploading $file"
         }
+    }
+
+    # Check if directory is empty. If yes: delete.
+    if($deleteOnSuccessfulUpload -and (Get-ChildItem $directory | Measure-Object).count -eq 0)
+    {
+        Remove-Item $directory
+        Write-Host "Deleted emptry directory: $directory"
     }
 }
 
