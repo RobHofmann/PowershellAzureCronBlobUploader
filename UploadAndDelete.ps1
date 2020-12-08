@@ -60,8 +60,8 @@ function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $con
     # Check if directory is empty. If yes: delete.
     if($deleteOnSuccessfulUpload -and (Get-ChildItem $directory | Measure-Object).count -eq 0)
     {
-        Remove-Item $directory
-        Write-Host "Deleted emptry directory: $directory"
+        Remove-Item $directory -Force
+        Write-Host "Deleted empty directory: $directory"
     }
 }
 
