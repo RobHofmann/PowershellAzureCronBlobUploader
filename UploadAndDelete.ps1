@@ -3,6 +3,9 @@ param (
     [Parameter(Mandatory=$true)]
     [String] $uploadRootDirectory,
 
+    [Parameter(Mandatory=$false)]
+    [string] $skipDirectories,
+
     [Parameter(Mandatory=$true)]
     [string] $storageAccountName,
 
@@ -19,8 +22,14 @@ param (
     [int] $deleteOnSuccessfulUpload
 )
 
-function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $containerName, $filesOlderThan, $deleteOnSuccessfulUpload)
+function UploadDirectory($uploadRootDirectory, $directory, $skipDirectories, $storageContext, $containerName, $filesOlderThan, $deleteOnSuccessfulUpload)
 {
+    # Return if we need to skip this directory
+    if(DirectoryPathIsInSkipDirectories -directory $directory -skipDirectories $skipDirectories)
+    {
+        return;
+    }
+
     # First recurse through subdirectories
     $subDirectories = Get-ChildItem -Path $directory -Directory
     foreach ($subDirectory in $subDirectories) {
@@ -65,7 +74,22 @@ function UploadDirectory($uploadRootDirectory, $directory, $storageContext, $con
     }
 }
 
+function DirectoryPathIsInSkipDirectories($directory, $skipDirectories)
+{
+    foreach($skipDirectory in $skipDirectories)
+    {
+        if($directory -like $skipDirectory)
+        {
+            return $true
+        }
+    }
+    return $false
+}
+
+
+
+$skipDirectories = $skipDirectories.Split(';')
 $cutOffDate = (Get-date).AddSeconds($gracePeriodInSeconds * -1)
 $storageContext = New-AzStorageContext -storageAccountName $storageAccountName -storageAccountKey $storageAccountKey
 Set-Location $uploadRootDirectory
-UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -storageContext $storageContext -containerName $containerName -filesOlderThan $cutOffDate -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
+UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -skipDirectories $skipDirectories -storageContext $storageContext -containerName $containerName -filesOlderThan $cutOffDate -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload

@@ -4,6 +4,7 @@ Powershell script that uploads files to Blob storage &amp; optionally deletes up
 # Environment variables needed
 | Variable name | Example value | Description |
 | ------------- | ------------- | ------------- |
+| SKIP_DIRECTORIES | `*something*;anotherSomething*;/data/somesubfolder` | Folders which you want to skip uploading. Wildcards are permitted. This is an optional parameter. |
 | UPLOAD_CRON_EXPRESSION | `*/2 * * * *` | The CRON expression in which frequency to run the script. |
 | STORAGE_ACCOUNT_NAME | `mystorageaccount` | The Azure StorageAccountname. |
 | STORAGE_ACCOUNT_KEY | `mOIUoumoimUOImuoyb9696d93q8m9+asd+1f==` | This accesskey can be found in your storage account under "Access keys". |
