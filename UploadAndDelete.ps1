@@ -33,7 +33,7 @@ function UploadDirectory($uploadRootDirectory, $directory, $skipDirectories, $st
     # First recurse through subdirectories
     $subDirectories = Get-ChildItem -Path $directory -Directory
     foreach ($subDirectory in $subDirectories) {
-        UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $subDirectory -storageContext $storageContext -containerName $containerName -filesOlderThan $filesOlderThan -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
+        UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $subDirectory -skipDirectories $skipDirectories -storageContext $storageContext -containerName $containerName -filesOlderThan $filesOlderThan -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
     }
 
     # Get all files and see if we need to upload them.
