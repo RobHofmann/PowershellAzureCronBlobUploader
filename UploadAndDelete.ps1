@@ -15,6 +15,9 @@ param (
     [Parameter(Mandatory=$true)]
     [string] $containerName,
 
+    [Parameter(Mandatory=$true)]
+    [ValidateSet("Hot","Cool","Archive")] [string] $blobTier = "Archive",
+
     [Parameter(Mandatory=$false)]
     [int] $gracePeriodInSeconds = 0,
 
@@ -22,7 +25,7 @@ param (
     [int] $deleteOnSuccessfulUpload
 )
 
-function UploadDirectory($uploadRootDirectory, $directory, $skipDirectories, $storageContext, $containerName, $filesOlderThan, $deleteOnSuccessfulUpload)
+function UploadDirectory($uploadRootDirectory, $directory, $skipDirectories, $storageContext, $containerName, $filesOlderThan, $deleteOnSuccessfulUpload, $blobTier)
 {
     # Return if we need to skip this directory
     if(DirectoryPathIsInSkipDirectories -directory $directory -skipDirectories $skipDirectories)
@@ -33,7 +36,7 @@ function UploadDirectory($uploadRootDirectory, $directory, $skipDirectories, $st
     # First recurse through subdirectories
     $subDirectories = Get-ChildItem -Path $directory -Directory
     foreach ($subDirectory in $subDirectories) {
-        UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $subDirectory -skipDirectories $skipDirectories -storageContext $storageContext -containerName $containerName -filesOlderThan $filesOlderThan -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
+        UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $subDirectory -skipDirectories $skipDirectories -storageContext $storageContext -containerName $containerName -filesOlderThan $filesOlderThan -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload -blobTier $blobTier
     }
 
     # Get all files and see if we need to upload them.
@@ -42,7 +45,7 @@ function UploadDirectory($uploadRootDirectory, $directory, $skipDirectories, $st
         $relativePath = $file.Directory | Resolve-Path -Relative
         $blobFilename = Join-Path $relativePath $file.Name
         Write-Host "Uploading $file"
-        $uploadResult = Set-AzStorageBlobContent -File $file -Container $containerName -Blob $blobFilename -Context $storageContext -Force
+        $uploadResult = Set-AzStorageBlobContent -File $file -Container $containerName -Blob $blobFilename -Context $storageContext -Force -StandardBlobTier $blobTier
 
         if($uploadResult)
         {
@@ -92,4 +95,4 @@ $skipDirectories = $skipDirectories.Split(';')
 $cutOffDate = (Get-date).AddSeconds($gracePeriodInSeconds * -1)
 $storageContext = New-AzStorageContext -storageAccountName $storageAccountName -storageAccountKey $storageAccountKey
 Set-Location $uploadRootDirectory
-UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -skipDirectories $skipDirectories -storageContext $storageContext -containerName $containerName -filesOlderThan $cutOffDate -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload
+UploadDirectory -uploadRootDirectory $uploadRootDirectory -directory $uploadRootDirectory -skipDirectories $skipDirectories -storageContext $storageContext -containerName $containerName -filesOlderThan $cutOffDate -deleteOnSuccessfulUpload $deleteOnSuccessfulUpload -blobTier $blobTier

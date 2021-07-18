@@ -9,6 +9,7 @@ Powershell script that uploads files to Blob storage &amp; optionally deletes up
 | STORAGE_ACCOUNT_NAME | `mystorageaccount` | The Azure StorageAccountname. |
 | STORAGE_ACCOUNT_KEY | `mOIUoumoimUOImuoyb9696d93q8m9+asd+1f==` | This accesskey can be found in your storage account under "Access keys". |
 | BLOB_CONTAINER_NAME | `mydata` | The Blob container name to use. |
+| BLOB_TIER | `Archive` | The blob tier to use. Options are `Hot`, `Cool`, `Archive`. |
 | GRACE_PERIOD_IN_SECONDS | `3600` | Files newer than this grace period will be skipped (both for uploading & deleting). This is usefull for when files are still in use when the upload starts. |
 | DELETE_ON_SUCCESSFUL_UPLOAD | `1` | Deletes the local file after upload if 1 (Choose either `1` (true) or `0` (false)). |
 
@@ -18,5 +19,5 @@ Powershell script that uploads files to Blob storage &amp; optionally deletes up
 
 ## Example
 ```
-docker run --name=myuploader -e UPLOAD_CRON_EXPRESSION='*/2 * * * *' -e STORAGE_ACCOUNT_NAME="mystorageaccount" -e STORAGE_ACCOUNT_KEY="mOIUoumoimUOImuoyb9696d93q8m9+asd+1f==" -e BLOB_CONTAINER_NAME="mydata" -e GRACE_PERIOD_IN_SECONDS=3600 -e DELETE_ON_SUCCESSFUL_UPLOAD=1 -v /some/data/path/on/host:/data -d robhofmann/powershellazurecronblobuploader
+docker run --name=myuploader -e UPLOAD_CRON_EXPRESSION='*/2 * * * *' -e STORAGE_ACCOUNT_NAME="mystorageaccount" -e STORAGE_ACCOUNT_KEY="mOIUoumoimUOImuoyb9696d93q8m9+asd+1f==" -e BLOB_CONTAINER_NAME="mydata" -e BLOB_TIER="Archive" -e GRACE_PERIOD_IN_SECONDS=3600 -e DELETE_ON_SUCCESSFUL_UPLOAD=1 -v /some/data/path/on/host:/data -d robhofmann/powershellazurecronblobuploader
 ```
